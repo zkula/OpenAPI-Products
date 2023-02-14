@@ -7,9 +7,19 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { v4 } from "uuid";
 import { request } from "../helpers/app";
+import { createProductsTable, deleteProductsTable, client } from "../helpers/productsTable";
 
 describe("Products", () => {
   describe("POST /product", () => {
+    beforeAll(async () => {
+      await createProductsTable();
+    });
+
+    afterAll(async () => {
+      //Clean up
+      await deleteProductsTable();
+    });
+
     it("responds with 201 status code and newly created product data if product has been created successfully", async () => {
       const requestBody = {
         product: {
@@ -36,41 +46,6 @@ describe("Products", () => {
     });
 
     it("stores product in database", async () => {
-      //Point DynamoDBClient to Docker endpoint
-      const client = new DynamoDBClient({
-        endpoint: "http://localhost:8000",
-      });
-
-      //temp - delete
-      await client.send(
-        new DeleteTableCommand({
-          TableName: "Products",
-        }),
-      );
-
-      //Create new 'Products' table
-      await client.send(
-        new CreateTableCommand({
-          TableName: "Products",
-          AttributeDefinitions: [
-            {
-              AttributeName: "ProductID",
-              AttributeType: "S",
-            },
-          ],
-          KeySchema: [
-            {
-              AttributeName: "ProductID",
-              KeyType: "HASH",
-            },
-          ],
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 5,
-            WriteCapacityUnits: 5,
-          },
-        }),
-      );
-
       const product = {
         name: `product-name-${v4()}`,
         description: `product-description-${v4()}`,
@@ -102,13 +77,6 @@ describe("Products", () => {
       expect(item["Description"].S).toEqual(expectedProduct.description);
       expect(item["Price"].N).toEqual(String(expectedProduct.price));
       expect(item["CreatedAt"].N).toEqual(String(new Date(expectedProduct.createdAt).getTime()));
-
-      //Clean up
-      await client.send(
-        new DeleteTableCommand({
-          TableName: "Products",
-        }),
-      );
     });
   });
 });
