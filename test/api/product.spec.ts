@@ -100,8 +100,8 @@ describe("Products", () => {
       expect(item["ProductID"].S).toEqual(expectedProduct.id);
       expect(item["Name"].S).toEqual(expectedProduct.name);
       expect(item["Description"].S).toEqual(expectedProduct.description);
-      expect(item["Price"].N).toEqual(expectedProduct.price);
-      expect(item["CreatedAt"].N).toEqual(String(expectedProduct.createdAt));
+      expect(item["Price"].N).toEqual(String(expectedProduct.price));
+      expect(item["CreatedAt"].N).toEqual(String(new Date(expectedProduct.createdAt).getTime()));
 
       //Clean up
       await client.send(
