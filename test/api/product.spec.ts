@@ -1,4 +1,10 @@
-import { AttributeValue, DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  AttributeValue,
+  CreateTableCommand,
+  DeleteTableCommand,
+  DynamoDBClient,
+  GetItemCommand,
+} from "@aws-sdk/client-dynamodb";
 import { v4 } from "uuid";
 import { request } from "../helpers/app";
 
@@ -30,6 +36,34 @@ describe("Products", () => {
     });
 
     it("stores product in database", async () => {
+      //Point DynamoDBClient to Docker endpoint
+      const client = new DynamoDBClient({
+        endpoint: "http://localhost:8000",
+      });
+
+      //Create new 'Products' table
+      await client.send(
+        new CreateTableCommand({
+          TableName: "Products",
+          AttributeDefinitions: [
+            {
+              AttributeName: "ProductID",
+              AttributeType: "S",
+            },
+          ],
+          KeySchema: [
+            {
+              AttributeName: "ProductID",
+              KeyType: "HASH",
+            },
+          ],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 5,
+            WriteCapacityUnits: 5,
+          },
+        }),
+      );
+
       const product = {
         name: `product-name-${v4()}`,
         description: `product-description-${v4()}`,
@@ -42,24 +76,32 @@ describe("Products", () => {
 
       const response = await request.post("/product").send(requestBody);
 
-      const client = new DynamoDBClient({});
       const expectedProduct = response.body.product;
+
+      //Retrieve database product entry
       const output = await client.send(
         new GetItemCommand({
           TableName: "Products",
           Key: {
-            ProductId: { S: response.body.product.id },
+            ProductID: { S: response.body.product.id },
           },
         }),
       );
 
       expect(output.Item).not.toBeUndefined();
       const item = output.Item as Record<string, AttributeValue>;
-      expect(item["ProductId"].S).toEqual(expectedProduct.id);
+      expect(item["ProductID"].S).toEqual(expectedProduct.id);
       expect(item["Name"].S).toEqual(expectedProduct.name);
       expect(item["Description"].S).toEqual(expectedProduct.description);
       expect(item["Price"].N).toEqual(expectedProduct.price);
       expect(item["CreatedAt"].N).toEqual(String(expectedProduct.createdAt));
+
+      //Clean up
+      await client.send(
+        new DeleteTableCommand({
+          TableName: "Products",
+        }),
+      );
     });
   });
 });
