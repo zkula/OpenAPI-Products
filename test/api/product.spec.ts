@@ -41,6 +41,13 @@ describe("Products", () => {
         endpoint: "http://localhost:8000",
       });
 
+      //temp - delete
+      await client.send(
+        new DeleteTableCommand({
+          TableName: "Products",
+        }),
+      );
+
       //Create new 'Products' table
       await client.send(
         new CreateTableCommand({
