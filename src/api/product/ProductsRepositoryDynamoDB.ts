@@ -1,4 +1,5 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import config from "config";
 import { v4 } from "uuid";
 import { NewProduct, Product } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
@@ -7,9 +8,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
   private client: DynamoDBClient;
 
   constructor() {
-    this.client = new DynamoDBClient({
-      endpoint: "http://localhost:8000",
-    });
+    this.client = new DynamoDBClient(config.get("dynamodb"));
   }
 
   async create(newProduct: NewProduct): Promise<Product> {
@@ -21,7 +20,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
 
     await this.client.send(
       new PutItemCommand({
-        TableName: "Products",
+        TableName: config.get("dbTables.products.name"),
         Item: {
           ProductID: { S: product.id },
           Name: { S: product.name },

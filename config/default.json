@@ -2,5 +2,11 @@
   "server": {
     "port": 3000
   },
-  "authSecret": "secret"
+  "authSecret": "secret",
+  "dynamodb": {},
+  "dbTables": {
+    "products": {
+      "name": "Products"
+    }
+  }
 }

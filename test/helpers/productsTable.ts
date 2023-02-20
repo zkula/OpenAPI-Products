@@ -1,9 +1,8 @@
+import config from "config";
 import { CreateTableCommand, DeleteTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 //Point DynamoDBClient to Docker endpoint
-export const client = new DynamoDBClient({
-  endpoint: "http://localhost:8000",
-});
+export const client = new DynamoDBClient(config.get("dynamodb"));
 
 export const createProductsTable = async () => {
   //Create new 'Products' table
@@ -33,7 +32,7 @@ export const createProductsTable = async () => {
 export const deleteProductsTable = async () => {
   await client.send(
     new DeleteTableCommand({
-      TableName: "Products",
+      TableName: config.get("dbTables.products.name"),
     }),
   );
 };

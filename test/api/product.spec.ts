@@ -5,6 +5,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
 } from "@aws-sdk/client-dynamodb";
+import config from "config";
 import { v4 } from "uuid";
 import { request } from "../helpers/app";
 import { createProductsTable, deleteProductsTable, client } from "../helpers/productsTable";
@@ -63,7 +64,7 @@ describe("Products", () => {
       //Retrieve database product entry
       const output = await client.send(
         new GetItemCommand({
-          TableName: "Products",
+          TableName: config.get("dbTables.products.name"),
           Key: {
             ProductID: { S: response.body.product.id },
           },
