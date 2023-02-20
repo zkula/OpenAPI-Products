@@ -7,6 +7,7 @@ import { Product, NewProduct } from "./Product";
 import { v4 } from "uuid";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { ProductsRepositoryDynamoDB } from "./ProductsRepositoryDynamoDB";
+import { ProductsRepository } from "./ProductsRepository";
 
 export type ProductRequestBody = {
   product: NewProduct;
@@ -19,12 +20,14 @@ export type ProductResponseBody = {
 @Route("product")
 @provideSingleton(ProductController)
 export class ProductController extends Controller {
+  constructor(@inject("ProductsRepository") private productsRepository: ProductsRepository) {
+    super();
+  }
+
   @SuccessResponse(201)
   @Post()
   public async postProduct(@Body() reqBody: ProductRequestBody): Promise<ProductResponseBody> {
-    const repo = new ProductsRepositoryDynamoDB();
-
-    const product = await repo.create(reqBody.product);
+    const product = await this.productsRepository.create(reqBody.product);
 
     return { product };
   }

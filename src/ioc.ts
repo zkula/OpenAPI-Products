@@ -3,6 +3,8 @@ import { buildProviderModule } from "inversify-binding-decorators";
 import { Controller } from "tsoa";
 import { ArticlesRepository } from "./api/articles/ArticlesRepository";
 import { ArticlesRepositoryInMemory } from "./api/articles/ArticlesRepositoryInMemory";
+import { ProductsRepository } from "./api/product/ProductsRepository";
+import { ProductsRepositoryDynamoDB } from "./api/product/ProductsRepositoryDynamoDB";
 
 const iocContainer = new Container();
 
@@ -12,5 +14,7 @@ iocContainer.load(buildProviderModule());
 
 const inMemoryArticleRepository = new ArticlesRepositoryInMemory();
 iocContainer.bind<ArticlesRepository>("ArticlesRepository").toDynamicValue(() => inMemoryArticleRepository);
+
+iocContainer.bind<ProductsRepository>("ProductsRepository").toConstantValue(new ProductsRepositoryDynamoDB());
 
 export { iocContainer };

@@ -4,6 +4,14 @@ import { NewProduct, Product } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
 
 export class ProductsRepositoryDynamoDB implements ProductsRepository {
+  private client: DynamoDBClient;
+
+  constructor() {
+    this.client = new DynamoDBClient({
+      endpoint: "http://localhost:8000",
+    });
+  }
+
   async create(newProduct: NewProduct): Promise<Product> {
     const product = {
       ...newProduct,
@@ -11,11 +19,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
       createdAt: new Date(),
     };
 
-    const client = new DynamoDBClient({
-      endpoint: "http://localhost:8000",
-    });
-
-    await client.send(
+    await this.client.send(
       new PutItemCommand({
         TableName: "Products",
         Item: {
