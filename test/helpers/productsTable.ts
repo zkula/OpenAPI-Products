@@ -1,5 +1,7 @@
 import config from "config";
 import { CreateTableCommand, DeleteTableCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { iocContainer } from "../../src/ioc";
+import { ProductsRepository } from "../../src/api/product/ProductsRepository";
 
 //Point DynamoDBClient to Docker endpoint
 export const client = new DynamoDBClient(config.get("dynamodb"));
@@ -36,3 +38,5 @@ export const deleteProductsTable = async () => {
     }),
   );
 };
+
+export const getProductsRepository = () => iocContainer.get<ProductsRepository>("ProductsRepository");

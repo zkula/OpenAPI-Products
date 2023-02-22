@@ -84,16 +84,6 @@ describe("ProductsRepositoryDynamoDB", () => {
       const actualProduct = await getRepository().fetchById(expectedProduct.id);
 
       expect(actualProduct).toEqual(expectedProduct);
-      // expect(typeof actual.id).toBe("string");
-      // expect(actual.createdAt).toBeInstanceOf(Date);
-      // expect(new Date().getTime() - actual.createdAt.getTime()).toBeLessThan(1000);
-      // expect(output.Item).not.toBeUndefined();
-      // const item = output.Item as Record<string, AttributeValue>;
-      // expect(item["ProductID"].S).toEqual(actual.id);
-      // expect(item["Name"].S).toEqual(expectedProduct.name);
-      // expect(item["Description"].S).toEqual(expectedProduct.description);
-      // expect(item["Price"].N).toEqual(String(expectedProduct.price));
-      // expect(item["CreatedAt"].N).toEqual(String(actual.createdAt.getTime()));
     });
   });
 });
