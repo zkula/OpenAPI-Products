@@ -40,5 +40,27 @@ describe("Products", () => {
       expect(typeof responseBodyProduct.id).toEqual("string");
       expect(actualProduct).toEqual({ ...responseBodyProduct, createdAt: new Date(responseBodyProduct.createdAt) });
     });
+
+    it("responds with 422 status code and validation error if product is empty", async () => {
+      const response = await request.post("/product").send({
+        product: {},
+      });
+
+      expect(response.statusCode).toEqual(422);
+      expect(response.body).toEqual({
+        details: {
+          "reqBody.product.description": {
+            message: "'description' is required",
+          },
+          "reqBody.product.name": {
+            message: "'name' is required",
+          },
+          "reqBody.product.price": {
+            message: "'price' is required",
+          },
+        },
+        message: "validation failed",
+      });
+    });
   });
 });
