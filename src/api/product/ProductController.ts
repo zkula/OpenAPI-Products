@@ -25,6 +25,7 @@ export class ProductController extends Controller {
   }
 
   @SuccessResponse(201)
+  @Security(securities.USER_AUTH)
   @Post()
   public async postProduct(@Body() reqBody: ProductRequestBody): Promise<ProductResponseBody> {
     const product = await this.productsRepository.create(reqBody.product);
