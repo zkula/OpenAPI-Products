@@ -66,24 +66,24 @@ describe("ProductsRepositoryDynamoDB", () => {
     });
 
     it("Returns a product if product with given id exists in the database", async () => {
-      const product = createProduct();
+      const expectedProduct = createProduct();
 
-      const output = await client.send(
+      await client.send(
         new PutItemCommand({
           TableName: config.get("dbTables.products.name"),
           Item: {
-            ProductID: { S: product.id },
-            Name: { S: product.name },
-            Description: { S: product.description },
-            Price: { N: String(product.price) },
-            CreatedAt: { N: product.createdAt.getTime().toString() },
+            ProductID: { S: expectedProduct.id },
+            Name: { S: expectedProduct.name },
+            Description: { S: expectedProduct.description },
+            Price: { N: String(expectedProduct.price) },
+            CreatedAt: { N: expectedProduct.createdAt.getTime().toString() },
           },
         }),
       );
 
-      const actual = await getRepository().fetchById(product.id);
+      const actualProduct = await getRepository().fetchById(expectedProduct.id);
 
-      expect(actual).toEqual(product);
+      expect(actualProduct).toEqual(expectedProduct);
       // expect(typeof actual.id).toBe("string");
       // expect(actual.createdAt).toBeInstanceOf(Date);
       // expect(new Date().getTime() - actual.createdAt.getTime()).toBeLessThan(1000);

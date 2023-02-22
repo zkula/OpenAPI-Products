@@ -1,10 +1,4 @@
-import {
-  AttributeValue,
-  CreateTableCommand,
-  DeleteTableCommand,
-  DynamoDBClient,
-  GetItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { AttributeValue, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import config from "config";
 import { v4 } from "uuid";
 import { request } from "../helpers/app";
