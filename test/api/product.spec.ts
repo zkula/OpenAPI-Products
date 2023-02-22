@@ -1,7 +1,7 @@
 import { v4 } from "uuid";
 import { NewProduct } from "../../src/api/product/Product";
 import { request } from "../helpers/app";
-import { getAuthToken } from "../helpers/auth";
+import { getAuthToken, testUnauthorized } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
 import { createProductsTable, deleteProductsTable, client, getProductsRepository } from "../helpers/productsTable";
 
@@ -33,16 +33,11 @@ describe("Products", () => {
   });
 
   describe("POST /product", () => {
-    it("responds with 401 status code and unauthorized error message if auth token is invalid", async () => {
-      const response = await request.post(endpoint).send({
-        product: createProduct({
-          id: undefined,
-          createdAt: undefined,
-        }),
-      });
-
-      expect(response.body).toHaveProperty("type", "UNAUTHORIZED");
-      expect(response.statusCode).toEqual(401);
+    testUnauthorized(endpoint, "post", {
+      product: createProduct({
+        id: undefined,
+        createdAt: undefined,
+      }),
     });
 
     it("responds with 201 status code and newly created product data if product has been created successfully", async () => {
