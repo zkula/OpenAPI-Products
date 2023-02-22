@@ -32,4 +32,13 @@ export class ProductController extends Controller {
 
     return { product };
   }
+
+  @SuccessResponse(200)
+  @Security(securities.USER_AUTH)
+  @Get("{id}")
+  public async getProduct(@Path("id") id: string): Promise<ProductResponseBody> {
+    const product = (await this.productsRepository.fetchById(id)) as Product;
+
+    return { product };
+  }
 }

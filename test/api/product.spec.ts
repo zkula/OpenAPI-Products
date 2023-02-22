@@ -1,4 +1,5 @@
 import { v4 } from "uuid";
+import { NewProduct } from "../../src/api/product/Product";
 import { request } from "../helpers/app";
 import { getAuthToken } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
@@ -14,6 +15,21 @@ describe("Products", () => {
   afterAll(async () => {
     //Clean up
     await deleteProductsTable();
+  });
+
+  describe("GET /product/{id}", () => {
+    it("responds with 200 status code and product data if product with given id exists in database", async () => {
+      const newProduct: NewProduct = createProduct({ id: undefined, createdAt: undefined });
+      const expectedProduct = await getProductsRepository().create(newProduct);
+      const expectedProductResponseBody = {
+        product: { ...expectedProduct, createdAt: expectedProduct.createdAt.toISOString() },
+      };
+
+      const response = await request.get(`${endpoint}/${expectedProduct.id}`).set("Authorization", getAuthToken(v4()));
+
+      expect(response.body).toEqual(expectedProductResponseBody);
+      expect(response.status).toEqual(200);
+    });
   });
 
   describe("POST /product", () => {
