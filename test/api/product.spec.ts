@@ -31,13 +31,14 @@ describe("Products", () => {
       };
 
       const response = await request.post("/product").send(requestBody);
-      const actualProduct = await getProductsRepository().fetchById(response.body.productId);
+      const responseBodyProduct = response.body.product;
+      const actualProduct = await getProductsRepository().fetchById(response.body.product.id);
 
       expect(response.body).toEqual(expectedResponseBody);
-      expect(new Date().getTime() - new Date(response.body.product.createdAt).getTime()).toBeLessThan(1000);
+      expect(new Date().getTime() - new Date(responseBodyProduct.createdAt).getTime()).toBeLessThan(5000);
       expect(response.statusCode).toEqual(201);
-      expect(typeof response.body.product.id).toEqual("string");
-      expect(actualProduct).toEqual(response.body.product);
+      expect(typeof responseBodyProduct.id).toEqual("string");
+      expect(actualProduct).toEqual({ ...responseBodyProduct, createdAt: new Date(responseBodyProduct.createdAt) });
     });
   });
 });

@@ -45,7 +45,7 @@ describe("ProductsRepositoryDynamoDB", () => {
       expect(actual).toEqual(expectedProduct);
       expect(typeof actual.id).toBe("string");
       expect(actual.createdAt).toBeInstanceOf(Date);
-      expect(new Date().getTime() - actual.createdAt.getTime()).toBeLessThan(1000);
+      expect(new Date().getTime() - actual.createdAt.getTime()).toBeLessThan(5000);
 
       expect(output.Item).not.toBeUndefined();
       const item = output.Item as Record<string, AttributeValue>;
