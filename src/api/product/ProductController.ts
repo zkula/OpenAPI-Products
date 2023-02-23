@@ -8,6 +8,7 @@ import { v4 } from "uuid";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { ProductsRepositoryDynamoDB } from "./ProductsRepositoryDynamoDB";
 import { ProductsRepository } from "./ProductsRepository";
+import { ApiError } from "../ApiError";
 
 export type ProductRequestBody = {
   product: NewProduct;
@@ -37,7 +38,14 @@ export class ProductController extends Controller {
   @Security(securities.USER_AUTH)
   @Get("{id}")
   public async getProduct(@Path("id") id: string): Promise<ProductResponseBody> {
-    const product = (await this.productsRepository.fetchById(id)) as Product;
+    const product = await this.productsRepository.fetchById(id);
+
+    if (!product) {
+      throw new ApiError({
+        statusCode: 404,
+        type: "PRODUCT_NOT_FOUND",
+      });
+    }
 
     return { product };
   }

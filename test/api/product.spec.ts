@@ -32,6 +32,13 @@ describe("Products", () => {
       expect(response.body).toEqual(expectedProductResponseBody);
       expect(response.status).toEqual(200);
     });
+
+    it("responds with 404 status code and not found message if the product with given id does not exist", async () => {
+      const response = await request.get(`${endpoint}/${v4()}`).set("Authorization", getAuthToken(v4()));
+
+      expect(response.body.type).toEqual("PRODUCT_NOT_FOUND");
+      expect(response.status).toEqual(404);
+    });
   });
 
   describe("POST /product", () => {
