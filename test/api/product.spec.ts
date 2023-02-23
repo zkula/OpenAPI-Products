@@ -18,6 +18,8 @@ describe("Products", () => {
   });
 
   describe("GET /product/{id}", () => {
+    testUnauthorized(`${endpoint}/${v4()}`, "get");
+
     it("responds with 200 status code and product data if product with given id exists in database", async () => {
       const newProduct: NewProduct = createProduct({ id: undefined, createdAt: undefined });
       const expectedProduct = await getProductsRepository().create(newProduct);
