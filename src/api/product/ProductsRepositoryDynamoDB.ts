@@ -35,6 +35,28 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     return product;
   }
 
+  async update(product: Product): Promise<Product | undefined> {
+    const existingProduct = await this.fetchById(product.id);
+    if (!existingProduct) {
+      return undefined;
+    }
+
+    await this.client.send(
+      new PutItemCommand({
+        TableName: config.get("dbTables.products.name"),
+        Item: {
+          ProductID: { S: product.id },
+          Name: { S: product.name },
+          Description: { S: product.description },
+          Price: { N: String(product.price) },
+          CreatedAt: { N: existingProduct.createdAt.getTime().toString() },
+        },
+      }),
+    );
+
+    return product;
+  }
+
   async fetchById(id: string): Promise<Product | undefined> {
     const output = await this.client.send(
       new GetItemCommand({
