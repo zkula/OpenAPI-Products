@@ -1,9 +1,31 @@
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { AttributeValue, DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import config from "config";
 import { v4 } from "uuid";
 import { NewProduct, Product } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+
+export const mapProductToDynamoDBItem = (product: Product): Record<string, AttributeValue> => {
+  return {
+    ProductID: { S: product.id },
+    Name: { S: product.name },
+    Description: { S: product.description },
+    Price: { N: String(product.price) },
+    CreatedAt: { N: product.createdAt.getTime().toString() },
+  };
+};
+
+export const mapDynamoDBItemToProduct = (item: Record<string, AttributeValue>): Product => {
+  const obj = unmarshall(item);
+
+  return {
+    id: obj["ProductID"],
+    name: obj["Name"],
+    description: obj["Description"],
+    price: obj["Price"],
+    createdAt: new Date(obj["CreatedAt"]),
+  };
+};
 
 export class ProductsRepositoryDynamoDB implements ProductsRepository {
   private client: DynamoDBClient;
@@ -22,13 +44,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     await this.client.send(
       new PutItemCommand({
         TableName: config.get("dbTables.products.name"),
-        Item: {
-          ProductID: { S: product.id },
-          Name: { S: product.name },
-          Description: { S: product.description },
-          Price: { N: String(product.price) },
-          CreatedAt: { N: product.createdAt.getTime().toString() },
-        },
+        Item: mapProductToDynamoDBItem(product),
       }),
     );
 
@@ -44,13 +60,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     await this.client.send(
       new PutItemCommand({
         TableName: config.get("dbTables.products.name"),
-        Item: {
-          ProductID: { S: product.id },
-          Name: { S: product.name },
-          Description: { S: product.description },
-          Price: { N: String(product.price) },
-          CreatedAt: { N: existingProduct.createdAt.getTime().toString() },
-        },
+        Item: mapProductToDynamoDBItem({ ...product, createdAt: existingProduct.createdAt }),
       }),
     );
 
@@ -71,14 +81,6 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
       return undefined;
     }
 
-    const obj = unmarshall(output.Item);
-
-    return {
-      id: obj["ProductID"],
-      name: obj["Name"],
-      description: obj["Description"],
-      price: obj["Price"],
-      createdAt: new Date(obj["CreatedAt"]),
-    };
+    return mapDynamoDBItemToProduct(output.Item);
   }
 }
