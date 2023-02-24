@@ -2,7 +2,11 @@ import { AttributeValue, GetItemCommand, PutItemCommand } from "@aws-sdk/client-
 import config from "config";
 import { v4 } from "uuid";
 import { NewProduct, Product } from "../../src/api/product/Product";
-import { ProductsRepositoryDynamoDB } from "../../src/api/product/ProductsRepositoryDynamoDB";
+import {
+  mapDynamoDBItemToProduct,
+  mapProductToDynamoDBItem,
+  ProductsRepositoryDynamoDB,
+} from "../../src/api/product/ProductsRepositoryDynamoDB";
 import { createProduct } from "../helpers/createProduct";
 import { client, createProductsTable, deleteProductsTable, getProductsRepository } from "../helpers/productsTable";
 
@@ -49,11 +53,13 @@ describe("ProductsRepositoryDynamoDB", () => {
 
       expect(output.Item).not.toBeUndefined();
       const item = output.Item as Record<string, AttributeValue>;
-      expect(item["ProductID"].S).toEqual(actual.id);
-      expect(item["Name"].S).toEqual(expectedProduct.name);
-      expect(item["Description"].S).toEqual(expectedProduct.description);
-      expect(item["Price"].N).toEqual(String(expectedProduct.price));
-      expect(item["CreatedAt"].N).toEqual(String(actual.createdAt.getTime()));
+      const storedProduct = mapDynamoDBItemToProduct(item);
+
+      expect(storedProduct).toEqual({
+        ...expectedProduct,
+        id: actual.id,
+        createdAt: actual.createdAt,
+      });
     });
   });
 
@@ -71,13 +77,7 @@ describe("ProductsRepositoryDynamoDB", () => {
       await client.send(
         new PutItemCommand({
           TableName: config.get("dbTables.products.name"),
-          Item: {
-            ProductID: { S: existingProduct.id },
-            Name: { S: existingProduct.name },
-            Description: { S: existingProduct.description },
-            Price: { N: String(existingProduct.price) },
-            CreatedAt: { N: existingProduct.createdAt.getTime().toString() },
-          },
+          Item: mapProductToDynamoDBItem(existingProduct),
         }),
       );
 
@@ -100,11 +100,12 @@ describe("ProductsRepositoryDynamoDB", () => {
       expect(actual).toEqual(newProduct);
       expect(output.Item).not.toBeUndefined();
       const item = output.Item as Record<string, AttributeValue>;
-      expect(item["ProductID"].S).toEqual(actual.id);
-      expect(item["Name"].S).toEqual(newProduct.name);
-      expect(item["Description"].S).toEqual(newProduct.description);
-      expect(item["Price"].N).toEqual(String(newProduct.price));
-      expect(item["CreatedAt"].N).toEqual(String(actual.createdAt.getTime()));
+      const modifiedProduct = mapDynamoDBItemToProduct(item);
+      expect(modifiedProduct).toEqual({
+        ...newProduct,
+        id: actual.id,
+        createdAt: existingProduct.createdAt,
+      });
     });
   });
 
@@ -122,13 +123,7 @@ describe("ProductsRepositoryDynamoDB", () => {
       await client.send(
         new PutItemCommand({
           TableName: config.get("dbTables.products.name"),
-          Item: {
-            ProductID: { S: expectedProduct.id },
-            Name: { S: expectedProduct.name },
-            Description: { S: expectedProduct.description },
-            Price: { N: String(expectedProduct.price) },
-            CreatedAt: { N: expectedProduct.createdAt.getTime().toString() },
-          },
+          Item: mapProductToDynamoDBItem(expectedProduct),
         }),
       );
 
