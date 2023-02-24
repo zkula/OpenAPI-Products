@@ -4,7 +4,7 @@ import { v4 } from "uuid";
 import { NewProduct, Product } from "../../src/api/product/Product";
 import { ProductsRepositoryDynamoDB } from "../../src/api/product/ProductsRepositoryDynamoDB";
 import { createProduct } from "../helpers/createProduct";
-import { client, createProductsTable, deleteProductsTable } from "../helpers/productsTable";
+import { client, createProductsTable, deleteProductsTable, getProductsRepository } from "../helpers/productsTable";
 
 const getRepository = () => new ProductsRepositoryDynamoDB();
 
@@ -53,6 +53,57 @@ describe("ProductsRepositoryDynamoDB", () => {
       expect(item["Name"].S).toEqual(expectedProduct.name);
       expect(item["Description"].S).toEqual(expectedProduct.description);
       expect(item["Price"].N).toEqual(String(expectedProduct.price));
+      expect(item["CreatedAt"].N).toEqual(String(actual.createdAt.getTime()));
+    });
+  });
+
+  describe("update", () => {
+    it("returns undefined and does not modify anything in database if given product does not exist", async () => {
+      const product = createProduct();
+      const actual = await getProductsRepository().update(product);
+
+      expect(actual).toBeUndefined;
+    });
+
+    it("updates a product in the database and returns the updated Product if given product exists", async () => {
+      const existingProduct = createProduct();
+
+      await client.send(
+        new PutItemCommand({
+          TableName: config.get("dbTables.products.name"),
+          Item: {
+            ProductID: { S: existingProduct.id },
+            Name: { S: existingProduct.name },
+            Description: { S: existingProduct.description },
+            Price: { N: String(existingProduct.price) },
+            CreatedAt: { N: existingProduct.createdAt.getTime().toString() },
+          },
+        }),
+      );
+
+      const newProduct = createProduct({
+        id: existingProduct.id,
+        createdAt: existingProduct.createdAt,
+      });
+
+      const actual = (await getProductsRepository().update(newProduct)) as Product;
+
+      const output = await client.send(
+        new GetItemCommand({
+          TableName: config.get("dbTables.products.name"),
+          Key: {
+            ProductID: { S: actual.id },
+          },
+        }),
+      );
+
+      expect(actual).toEqual(newProduct);
+      expect(output.Item).not.toBeUndefined();
+      const item = output.Item as Record<string, AttributeValue>;
+      expect(item["ProductID"].S).toEqual(actual.id);
+      expect(item["Name"].S).toEqual(newProduct.name);
+      expect(item["Description"].S).toEqual(newProduct.description);
+      expect(item["Price"].N).toEqual(String(newProduct.price));
       expect(item["CreatedAt"].N).toEqual(String(actual.createdAt.getTime()));
     });
   });
