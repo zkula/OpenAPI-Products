@@ -4,6 +4,7 @@ import { v4 } from "uuid";
 import { ProductData, Product } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { createProduct } from "../../../test/helpers/CreateProduct";
 
 export const mapProductToDynamoDBItem = (product: Product): Record<string, AttributeValue> => {
   return {
@@ -84,5 +85,9 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     }
 
     return mapDynamoDBItemToProduct(output.Item);
+  }
+
+  async delete(id: string): Promise<Product | undefined> {
+    return undefined;
   }
 }
