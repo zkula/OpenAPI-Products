@@ -86,6 +86,8 @@ describe("ProductsRepositoryDynamoDB", () => {
         createdAt: undefined,
       });
 
+      const expectedProduct = { ...newProductData, id: existingProduct.id, createdAt: existingProduct.createdAt };
+
       const actual = (await getProductsRepository().update(existingProduct.id, newProductData)) as Product;
 
       const output = await client.send(
@@ -97,7 +99,7 @@ describe("ProductsRepositoryDynamoDB", () => {
         }),
       );
 
-      expect(actual).toEqual({ ...newProductData, id: existingProduct.id, createdAt: existingProduct.createdAt });
+      expect(actual).toEqual(expectedProduct);
       expect(output.Item).not.toBeUndefined();
       const item = output.Item as Record<string, AttributeValue>;
       const modifiedProduct = mapDynamoDBItemToProduct(item);
