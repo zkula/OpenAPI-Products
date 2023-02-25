@@ -37,7 +37,14 @@ export class ProductController extends Controller {
     @Path("id") id: string,
     @Body() reqBody: ProductRequestBody,
   ): Promise<ProductResponseBody | undefined> {
-    const product = (await this.productsRepository.update(id, reqBody.product)) as Product;
+    const product = await this.productsRepository.update(id, reqBody.product);
+
+    if (!product) {
+      throw new ApiError({
+        statusCode: 404,
+        type: "PRODUCT_NOT_FOUND",
+      });
+    }
 
     return { product };
   }

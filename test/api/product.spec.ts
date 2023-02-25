@@ -1,3 +1,4 @@
+import { response } from "express";
 import { v4 } from "uuid";
 import { ProductData } from "../../src/api/product/Product";
 import { request } from "../helpers/app";
@@ -41,15 +42,19 @@ describe("Products", () => {
     });
   });
 
-  describe.skip("PUT /product/{id}", () => {
-    testUnauthorized(endpoint, "put");
+  describe("PUT /product/{id}", () => {
+    testUnauthorized(`${endpoint}/${v4()}`, "put", {
+      product: createProduct({
+        id: undefined,
+        createdAt: undefined,
+      }),
+    });
 
     it("reponds with a 200 status code and updated product data if product has been updated successfully", async () => {
       const oldProduct: ProductData = createProduct({ id: undefined, createdAt: undefined });
       const newProduct: ProductData = createProduct({
         id: undefined,
         createdAt: undefined,
-        description: "UPDATE TEST",
       });
       const requestBody = {
         product: newProduct,
@@ -66,6 +71,17 @@ describe("Products", () => {
 
       expect(response.body).toEqual(expectedProductResponseBody);
       expect(response.status).toEqual(200);
+    });
+
+    it("responds with 404 status code and not found error message if product does not exist", async () => {
+      const product = createProduct();
+      const response = await request
+        .put(`${endpoint}/${v4()}`)
+        .set("Authorization", getAuthToken(v4()))
+        .send({ product: createProduct({ id: undefined, createdAt: undefined }) });
+
+      expect(response.body.type).toEqual("PRODUCT_NOT_FOUND");
+      expect(response.status).toEqual(404);
     });
   });
 
