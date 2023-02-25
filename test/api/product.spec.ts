@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { NewProduct } from "../../src/api/product/Product";
+import { ProductData } from "../../src/api/product/Product";
 import { request } from "../helpers/app";
 import { getAuthToken, testUnauthorized } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
@@ -21,7 +21,7 @@ describe("Products", () => {
     testUnauthorized(`${endpoint}/${v4()}`, "get");
 
     it("responds with 200 status code and product data if product with given id exists in database", async () => {
-      const newProduct: NewProduct = createProduct({ id: undefined, createdAt: undefined });
+      const newProduct: ProductData = createProduct({ id: undefined, createdAt: undefined });
       const expectedProduct = await getProductsRepository().create(newProduct);
       const expectedProductResponseBody = {
         product: { ...expectedProduct, createdAt: expectedProduct.createdAt.toISOString() },
@@ -41,6 +41,34 @@ describe("Products", () => {
     });
   });
 
+  describe.skip("PUT /product/{id}", () => {
+    testUnauthorized(endpoint, "put");
+
+    it("reponds with a 200 status code and updated product data if product has been updated successfully", async () => {
+      const oldProduct: ProductData = createProduct({ id: undefined, createdAt: undefined });
+      const newProduct: ProductData = createProduct({
+        id: undefined,
+        createdAt: undefined,
+        description: "UPDATE TEST",
+      });
+      const requestBody = {
+        product: newProduct,
+      };
+      const expectedProduct = await getProductsRepository().create(oldProduct);
+      const expectedProductResponseBody = {
+        product: { ...newProduct, id: expectedProduct.id, createdAt: expectedProduct.createdAt.toISOString() },
+      };
+
+      const response = await request
+        .put(`${endpoint}/${expectedProduct.id}`)
+        .set("Authorization", getAuthToken(v4()))
+        .send(requestBody);
+
+      expect(response.body).toEqual(expectedProductResponseBody);
+      expect(response.status).toEqual(200);
+    });
+  });
+
   describe("POST /product", () => {
     testUnauthorized(endpoint, "post", {
       product: createProduct({
@@ -51,11 +79,7 @@ describe("Products", () => {
 
     it("responds with 201 status code and newly created product data if product has been created successfully", async () => {
       const requestBody = {
-        product: {
-          name: `product-name-${v4()}`,
-          description: `product-description-${v4()}`,
-          price: Math.random() * 50,
-        },
+        product: createProduct({ id: undefined, createdAt: undefined }),
       };
 
       const expectedResponseBody = {

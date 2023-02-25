@@ -1,7 +1,7 @@
 import { AttributeValue, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import config from "config";
 import { v4 } from "uuid";
-import { NewProduct, Product } from "../../src/api/product/Product";
+import { ProductData, Product } from "../../src/api/product/Product";
 import {
   mapDynamoDBItemToProduct,
   mapProductToDynamoDBItem,
@@ -23,8 +23,8 @@ describe("ProductsRepositoryDynamoDB", () => {
   });
 
   describe("create", () => {
-    it("stores a NewProduct in the database and returns Product with newly generated id and actual createdAt date", async () => {
-      const newProduct: NewProduct = createProduct({
+    it("stores a ProductData in the database and returns Product with newly generated id and actual createdAt date", async () => {
+      const newProduct: ProductData = createProduct({
         id: undefined,
         createdAt: undefined,
       });
@@ -66,7 +66,7 @@ describe("ProductsRepositoryDynamoDB", () => {
   describe("update", () => {
     it("returns undefined and does not modify anything in database if given product does not exist", async () => {
       const product = createProduct();
-      const actual = await getProductsRepository().update(product);
+      const actual = await getProductsRepository().update(product.id, product);
 
       expect(actual).toBeUndefined;
     });
@@ -81,12 +81,12 @@ describe("ProductsRepositoryDynamoDB", () => {
         }),
       );
 
-      const newProduct = createProduct({
-        id: existingProduct.id,
-        createdAt: existingProduct.createdAt,
+      const newProductData = createProduct({
+        id: undefined,
+        createdAt: undefined,
       });
 
-      const actual = (await getProductsRepository().update(newProduct)) as Product;
+      const actual = (await getProductsRepository().update(existingProduct.id, newProductData)) as Product;
 
       const output = await client.send(
         new GetItemCommand({
@@ -97,12 +97,12 @@ describe("ProductsRepositoryDynamoDB", () => {
         }),
       );
 
-      expect(actual).toEqual(newProduct);
+      expect(actual).toEqual({ ...newProductData, id: existingProduct.id, createdAt: existingProduct.createdAt });
       expect(output.Item).not.toBeUndefined();
       const item = output.Item as Record<string, AttributeValue>;
       const modifiedProduct = mapDynamoDBItemToProduct(item);
       expect(modifiedProduct).toEqual({
-        ...newProduct,
+        ...newProductData,
         id: actual.id,
         createdAt: existingProduct.createdAt,
       });
