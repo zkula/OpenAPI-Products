@@ -1,7 +1,7 @@
 import { AttributeValue, DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import config from "config";
 import { v4 } from "uuid";
-import { NewProduct, Product } from "./Product";
+import { ProductData, Product } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
@@ -34,7 +34,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     this.client = new DynamoDBClient(config.get("dynamodb"));
   }
 
-  async create(newProduct: NewProduct): Promise<Product> {
+  async create(newProduct: ProductData): Promise<Product> {
     const product = {
       ...newProduct,
       id: v4(),
@@ -51,20 +51,22 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     return product;
   }
 
-  async update(product: Product): Promise<Product | undefined> {
-    const existingProduct = await this.fetchById(product.id);
+  async update(id: string, productData: ProductData): Promise<Product | undefined> {
+    const existingProduct = await this.fetchById(id);
     if (!existingProduct) {
       return undefined;
     }
 
+    const newProduct = { ...productData, id, createdAt: existingProduct.createdAt };
+
     await this.client.send(
       new PutItemCommand({
         TableName: config.get("dbTables.products.name"),
-        Item: mapProductToDynamoDBItem({ ...product, createdAt: existingProduct.createdAt }),
+        Item: mapProductToDynamoDBItem(newProduct),
       }),
     );
 
-    return product;
+    return newProduct;
   }
 
   async fetchById(id: string): Promise<Product | undefined> {

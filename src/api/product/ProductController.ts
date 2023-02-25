@@ -1,17 +1,13 @@
 import { inject } from "inversify";
-import { Body, Controller, Get, Path, Post, Route, Security, SuccessResponse } from "tsoa";
-
+import { Body, Controller, Get, Path, Post, Put, Route, Security, SuccessResponse } from "tsoa";
 import securities from "../auth/securities";
 import { provideSingleton } from "../../util/provideSingleton";
-import { Product, NewProduct } from "./Product";
-import { v4 } from "uuid";
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { ProductsRepositoryDynamoDB } from "./ProductsRepositoryDynamoDB";
+import { Product, ProductData } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
 import { ApiError } from "../ApiError";
 
 export type ProductRequestBody = {
-  product: NewProduct;
+  product: ProductData;
 };
 
 export type ProductResponseBody = {
@@ -30,6 +26,18 @@ export class ProductController extends Controller {
   @Post()
   public async postProduct(@Body() reqBody: ProductRequestBody): Promise<ProductResponseBody> {
     const product = await this.productsRepository.create(reqBody.product);
+
+    return { product };
+  }
+
+  @SuccessResponse(200)
+  @Security(securities.USER_AUTH)
+  @Put("{id}")
+  public async putProduct(
+    @Path("id") id: string,
+    @Body() reqBody: ProductRequestBody,
+  ): Promise<ProductResponseBody | undefined> {
+    const product = (await this.productsRepository.update(id, reqBody.product)) as Product;
 
     return { product };
   }

@@ -1,7 +1,7 @@
-import { NewProduct, Product } from "./Product";
+import { ProductData, Product } from "./Product";
 
 export interface ProductsRepository {
-  create(newProduct: NewProduct): Promise<Product>;
+  create(newProduct: ProductData): Promise<Product>;
   fetchById(id: string): Promise<Product | undefined>;
-  update(product: Product): Promise<Product | undefined>;
+  update(id: string, product: ProductData): Promise<Product | undefined>;
 }

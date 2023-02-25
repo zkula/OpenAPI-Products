@@ -6,4 +6,4 @@ export interface Product {
   price: number;
 }
 
-export interface NewProduct extends Omit<Product, "id" | "createdAt"> {}
+export interface ProductData extends Omit<Product, "id" | "createdAt"> {}
