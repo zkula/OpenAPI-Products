@@ -1,6 +1,6 @@
 import { response } from "express";
 import { v4 } from "uuid";
-import { ProductData } from "../../src/api/product/Product";
+import { Product, ProductData } from "../../src/api/product/Product";
 import { request } from "../helpers/app";
 import { getAuthToken, testUnauthorized } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
@@ -142,5 +142,23 @@ describe("Products", () => {
 
   describe("DELETE /product/{id}", () => {
     testUnauthorized(`${endpoint}/${v4()}`, "delete");
+
+    it("responds with 204 status code if the product has been deleted successfully", async () => {
+      const createdProduct: Product = createProduct({ id: undefined, createdAt: undefined });
+      await getProductsRepository().create(createdProduct);
+
+      const deleteResponse = await request
+        .delete(`${endpoint}/${createdProduct.id}`)
+        .set("Authorization", getAuthToken(v4()));
+
+      expect(deleteResponse.statusCode).toEqual(204);
+
+      const getResponse = await request
+        .get(`${endpoint}/${createdProduct.id}`)
+        .set("Authorization", getAuthToken(v4()));
+
+      expect(getResponse.body.type).toEqual("PRODUCT_NOT_FOUND");
+      expect(getResponse.status).toEqual(404);
+    });
   });
 });
