@@ -1,4 +1,10 @@
-import { AttributeValue, DynamoDBClient, GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  AttributeValue,
+  DeleteItemCommand,
+  DynamoDBClient,
+  GetItemCommand,
+  PutItemCommand,
+} from "@aws-sdk/client-dynamodb";
 import config from "config";
 import { v4 } from "uuid";
 import { ProductData, Product } from "./Product";
@@ -87,7 +93,22 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     return mapDynamoDBItemToProduct(output.Item);
   }
 
-  async delete(id: string): Promise<Product | undefined> {
-    return undefined;
+  async delete(id: string): Promise<Boolean> {
+    const existingProduct = await this.fetchById(id);
+
+    if (!existingProduct) {
+      return false;
+    }
+
+    await this.client.send(
+      new DeleteItemCommand({
+        TableName: config.get("dbTables.products.name"),
+        Key: {
+          ProductID: { S: id },
+        },
+      }),
+    );
+
+    return true;
   }
 }

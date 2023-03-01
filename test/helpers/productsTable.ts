@@ -10,7 +10,7 @@ export const createProductsTable = async () => {
   //Create new 'Products' table
   await client.send(
     new CreateTableCommand({
-      TableName: "Products",
+      TableName: config.get("dbTables.products.name"),
       AttributeDefinitions: [
         {
           AttributeName: "ProductID",

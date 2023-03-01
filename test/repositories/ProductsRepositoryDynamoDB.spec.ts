@@ -134,4 +134,37 @@ describe("ProductsRepositoryDynamoDB", () => {
       expect(actualProduct).toEqual(expectedProduct);
     });
   });
+
+  describe("delete", () => {
+    it("Returns false if the product with given id does not exist in the database", async () => {
+      const id = v4();
+      const actual = await getRepository().delete(id);
+
+      expect(actual).toBeFalsy();
+    });
+
+    it("Returns true if product with given id exists in the database and was deleted successfully", async () => {
+      const existingProduct = createProduct();
+
+      await client.send(
+        new PutItemCommand({
+          TableName: config.get("dbTables.products.name"),
+          Item: mapProductToDynamoDBItem(existingProduct),
+        }),
+      );
+
+      const actual = await getRepository().delete(existingProduct.id);
+      const output = await client.send(
+        new GetItemCommand({
+          TableName: config.get("dbTables.products.name"),
+          Key: {
+            ProductID: { S: existingProduct.id },
+          },
+        }),
+      );
+
+      expect(actual).toBeTruthy();
+      expect(output.Item).toBeUndefined();
+    });
+  });
 });
