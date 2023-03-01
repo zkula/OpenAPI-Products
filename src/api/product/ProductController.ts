@@ -1,5 +1,5 @@
 import { inject } from "inversify";
-import { Body, Controller, Get, Path, Post, Put, Route, Security, SuccessResponse } from "tsoa";
+import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, SuccessResponse } from "tsoa";
 import securities from "../auth/securities";
 import { provideSingleton } from "../../util/provideSingleton";
 import { Product, ProductData } from "./Product";
@@ -64,4 +64,8 @@ export class ProductController extends Controller {
 
     return { product };
   }
+
+  @Delete("{id}")
+  @Security(securities.USER_AUTH)
+  public async deleteProduct(@Path("id") id: string): Promise<void> {}
 }

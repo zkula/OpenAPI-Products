@@ -139,4 +139,8 @@ describe("Products", () => {
       });
     });
   });
+
+  describe("DELETE /product/{id}", () => {
+    testUnauthorized(`${endpoint}/${v4()}`, "delete");
+  });
 });
