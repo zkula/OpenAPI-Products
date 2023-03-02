@@ -167,4 +167,26 @@ describe("ProductsRepositoryDynamoDB", () => {
       expect(output.Item).toBeUndefined();
     });
   });
+
+  describe("fetchAll", () => {
+    it("returns all existing products in the table as an array", async () => {
+      const expectedProducts = [createProduct(), createProduct()];
+
+      await Promise.all(
+        expectedProducts.map(async (product) => {
+          await client.send(
+            new PutItemCommand({
+              TableName: config.get("dbTables.products.name"),
+              Item: mapProductToDynamoDBItem(product),
+            }),
+          );
+        }),
+      );
+
+      const actualProducts = await getRepository().fetchAll();
+      actualProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
+      expectedProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
+      expect(actualProducts).toEqual(expectedProducts);
+    });
+  });
 });
