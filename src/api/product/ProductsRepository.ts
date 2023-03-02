@@ -5,4 +5,5 @@ export interface ProductsRepository {
   fetchById(id: string): Promise<Product | undefined>;
   update(id: string, product: ProductData): Promise<Product | undefined>;
   delete(id: string): Promise<Boolean>;
+  fetchAll(): Promise<Product[]>;
 }

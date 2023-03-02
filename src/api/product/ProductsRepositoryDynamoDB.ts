@@ -4,6 +4,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
+  ScanCommand,
 } from "@aws-sdk/client-dynamodb";
 import config from "config";
 import { v4 } from "uuid";
@@ -36,9 +37,11 @@ export const mapDynamoDBItemToProduct = (item: Record<string, AttributeValue>): 
 
 export class ProductsRepositoryDynamoDB implements ProductsRepository {
   private client: DynamoDBClient;
+  private tableName: string;
 
   constructor() {
     this.client = new DynamoDBClient(config.get("dynamodb"));
+    this.tableName = config.get("dbTables.products.name");
   }
 
   async create(newProduct: ProductData): Promise<Product> {
@@ -50,7 +53,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
 
     await this.client.send(
       new PutItemCommand({
-        TableName: config.get("dbTables.products.name"),
+        TableName: this.tableName,
         Item: mapProductToDynamoDBItem(product),
       }),
     );
@@ -68,7 +71,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
 
     await this.client.send(
       new PutItemCommand({
-        TableName: config.get("dbTables.products.name"),
+        TableName: this.tableName,
         Item: mapProductToDynamoDBItem(newProduct),
       }),
     );
@@ -79,7 +82,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
   async fetchById(id: string): Promise<Product | undefined> {
     const output = await this.client.send(
       new GetItemCommand({
-        TableName: config.get("dbTables.products.name"),
+        TableName: this.tableName,
         Key: {
           ProductID: { S: id },
         },
@@ -102,7 +105,7 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
 
     await this.client.send(
       new DeleteItemCommand({
-        TableName: config.get("dbTables.products.name"),
+        TableName: this.tableName,
         Key: {
           ProductID: { S: id },
         },
@@ -110,5 +113,11 @@ export class ProductsRepositoryDynamoDB implements ProductsRepository {
     );
 
     return true;
+  }
+
+  async fetchAll(): Promise<Product[]> {
+    const output = await this.client.send(new ScanCommand({ TableName: this.tableName }));
+
+    return (output.Items || [])?.map(mapDynamoDBItemToProduct);
   }
 }
