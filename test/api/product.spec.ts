@@ -31,14 +31,14 @@ describe("Products", () => {
       const response = await request.get(`${endpoint}/${expectedProduct.id}`).set("Authorization", getAuthToken(v4()));
 
       expect(response.body).toEqual(expectedProductResponseBody);
-      expect(response.status).toEqual(200);
+      expect(response.statusCode).toEqual(200);
     });
 
     it("responds with 404 status code and not found message if the product with given id does not exist", async () => {
       const response = await request.get(`${endpoint}/${v4()}`).set("Authorization", getAuthToken(v4()));
 
       expect(response.body.type).toEqual("PRODUCT_NOT_FOUND");
-      expect(response.status).toEqual(404);
+      expect(response.statusCode).toEqual(404);
     });
   });
 
@@ -70,7 +70,7 @@ describe("Products", () => {
         .send(requestBody);
 
       expect(response.body).toEqual(expectedProductResponseBody);
-      expect(response.status).toEqual(200);
+      expect(response.statusCode).toEqual(200);
     });
 
     it("responds with 404 status code and not found error message if product does not exist", async () => {
@@ -81,7 +81,7 @@ describe("Products", () => {
         .send({ product: createProduct({ id: undefined, createdAt: undefined }) });
 
       expect(response.body.type).toEqual("PRODUCT_NOT_FOUND");
-      expect(response.status).toEqual(404);
+      expect(response.statusCode).toEqual(404);
     });
   });
 
@@ -145,20 +145,27 @@ describe("Products", () => {
 
     it("responds with 204 status code if the product has been deleted successfully", async () => {
       const createdProduct: Product = createProduct({ id: undefined, createdAt: undefined });
-      await getProductsRepository().create(createdProduct);
+      const expectedProduct = await getProductsRepository().create(createdProduct);
 
       const deleteResponse = await request
-        .delete(`${endpoint}/${createdProduct.id}`)
+        .delete(`${endpoint}/${expectedProduct.id}`)
         .set("Authorization", getAuthToken(v4()));
 
       expect(deleteResponse.statusCode).toEqual(204);
 
       const getResponse = await request
-        .get(`${endpoint}/${createdProduct.id}`)
+        .get(`${endpoint}/${expectedProduct.id}`)
         .set("Authorization", getAuthToken(v4()));
 
       expect(getResponse.body.type).toEqual("PRODUCT_NOT_FOUND");
       expect(getResponse.status).toEqual(404);
+    });
+
+    it("responds with 404 status code and not found error message if product does not exist", async () => {
+      const response = await request.delete(`${endpoint}/${v4()}`).set("Authorization", getAuthToken(v4()));
+
+      expect(response.body.type).toEqual("PRODUCT_NOT_FOUND");
+      expect(response.statusCode).toEqual(404);
     });
   });
 });

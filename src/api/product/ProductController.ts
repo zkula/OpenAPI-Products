@@ -67,5 +67,14 @@ export class ProductController extends Controller {
 
   @Delete("{id}")
   @Security(securities.USER_AUTH)
-  public async deleteProduct(@Path("id") id: string): Promise<void> {}
+  public async deleteProduct(@Path("id") id: string): Promise<void> {
+    const deleted = await this.productsRepository.delete(id);
+
+    if (!deleted) {
+      throw new ApiError({
+        statusCode: 404,
+        type: "PRODUCT_NOT_FOUND",
+      });
+    }
+  }
 }
