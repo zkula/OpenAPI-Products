@@ -8,18 +8,19 @@ import {
   ProductsRepositoryDynamoDB,
 } from "../../src/api/product/ProductsRepositoryDynamoDB";
 import { createProduct } from "../helpers/createProduct";
-import { client, createProductsTable, deleteProductsTable, getProductsRepository } from "../helpers/productsTable";
+import {
+  client,
+  createProductsTableIfDoesNotExist,
+  clearProductsTable,
+  getProductsRepository,
+} from "../helpers/productsTable";
 
 const getRepository = () => new ProductsRepositoryDynamoDB();
 
 describe("ProductsRepositoryDynamoDB", () => {
   beforeAll(async () => {
-    await createProductsTable();
-  });
-
-  afterAll(async () => {
-    //Clean up
-    await deleteProductsTable();
+    await createProductsTableIfDoesNotExist();
+    await clearProductsTable();
   });
 
   describe("create", () => {

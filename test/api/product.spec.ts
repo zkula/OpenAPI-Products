@@ -4,18 +4,19 @@ import { Product, ProductData } from "../../src/api/product/Product";
 import { request } from "../helpers/app";
 import { getAuthToken, testUnauthorized } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
-import { createProductsTable, deleteProductsTable, client, getProductsRepository } from "../helpers/productsTable";
+import {
+  createProductsTableIfDoesNotExist,
+  clearProductsTable,
+  client,
+  getProductsRepository,
+} from "../helpers/productsTable";
 
 const endpoint = "/product";
 
 describe("Product", () => {
   beforeAll(async () => {
-    await createProductsTable();
-  });
-
-  afterAll(async () => {
-    //Clean up
-    await deleteProductsTable();
+    await createProductsTableIfDoesNotExist();
+    await clearProductsTable();
   });
 
   describe("GET /product/{id}", () => {
