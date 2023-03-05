@@ -8,35 +8,43 @@ export const client = new DynamoDBClient(config.get("dynamodb"));
 
 export const createProductsTable = async () => {
   //Create new 'Products' table
-  await client.send(
-    new CreateTableCommand({
-      TableName: config.get("dbTables.products.name"),
-      AttributeDefinitions: [
-        {
-          AttributeName: "ProductID",
-          AttributeType: "S",
+  try {
+    await client.send(
+      new CreateTableCommand({
+        TableName: config.get("dbTables.products.name"),
+        AttributeDefinitions: [
+          {
+            AttributeName: "ProductID",
+            AttributeType: "S",
+          },
+        ],
+        KeySchema: [
+          {
+            AttributeName: "ProductID",
+            KeyType: "HASH",
+          },
+        ],
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 5,
+          WriteCapacityUnits: 5,
         },
-      ],
-      KeySchema: [
-        {
-          AttributeName: "ProductID",
-          KeyType: "HASH",
-        },
-      ],
-      ProvisionedThroughput: {
-        ReadCapacityUnits: 5,
-        WriteCapacityUnits: 5,
-      },
-    }),
-  );
+      }),
+    );
+  } catch (err) {
+    console.log("err", err);
+  }
 };
 
 export const deleteProductsTable = async () => {
-  await client.send(
-    new DeleteTableCommand({
-      TableName: config.get("dbTables.products.name"),
-    }),
-  );
+  try {
+    await client.send(
+      new DeleteTableCommand({
+        TableName: config.get("dbTables.products.name"),
+      }),
+    );
+  } catch (err) {
+    console.log("err", err);
+  }
 };
 
 export const getProductsRepository = () => iocContainer.get<ProductsRepository>("ProductsRepository");
