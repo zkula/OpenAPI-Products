@@ -8,7 +8,7 @@ import { createProductsTable, deleteProductsTable, client, getProductsRepository
 
 const endpoint = "/product";
 
-describe("Products", () => {
+describe("Product", () => {
   beforeAll(async () => {
     await createProductsTable();
   });
