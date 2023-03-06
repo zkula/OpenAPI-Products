@@ -59,7 +59,7 @@ export const clearProductsTable = async () => {
   );
 
   await Promise.all(
-    (output.Items || []).map((item) => async () => {
+    (output.Items || []).map(async (item) => {
       return client.send(
         new DeleteItemCommand({
           TableName: config.get("dbTables.products.name"),

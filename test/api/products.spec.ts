@@ -13,7 +13,7 @@ const endpoint = "/products";
 
 describe("Products", () => {
   describe("GET /products", () => {
-    beforeAll(async () => {
+    beforeEach(async () => {
       await createProductsTableIfDoesNotExist();
       await clearProductsTable();
     });
@@ -24,14 +24,18 @@ describe("Products", () => {
       const productsData = [createProduct(), createProduct()];
 
       const expectedProducts = await Promise.all(
-        productsData.map(async (product) => {
-          await getProductsRepository().create(product);
+        productsData.map(async (data) => {
+          const product = await getProductsRepository().create(data);
+          return {
+            ...product,
+            createdAt: product.createdAt.toISOString(),
+          };
         }),
       );
 
       const response = await request.get(endpoint).set("Authorization", getAuthToken(v4()));
 
-      expect(response.body.products).toEqual(productsData);
+      expect(response.body.products).toEqual(expectedProducts);
       expect(response.statusCode).toEqual(200);
     });
   });
