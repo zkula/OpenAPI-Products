@@ -1,4 +1,6 @@
 import { v4 } from "uuid";
+import { ProductsController } from "../../src/api/product/ProductsController";
+import { iocContainer } from "../../src/ioc";
 import { request } from "../helpers/app";
 import { getAuthToken, testUnauthorized } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
@@ -13,25 +15,31 @@ const endpoint = "/products";
 
 describe("Products", () => {
   describe("GET /products", () => {
-    beforeEach(async () => {
-      await createProductsTableIfDoesNotExist();
-      await clearProductsTable();
+    beforeAll(async () => {
+      iocContainer.snapshot();
+      iocContainer.rebind(ProductsController).toSelf();
+    });
+
+    afterAll(async () => {
+      iocContainer.restore();
     });
 
     testUnauthorized(endpoint, "get");
 
     it("responds with 200 status code and the list of all of the products", async () => {
-      const productsData = [createProduct(), createProduct()];
+      const products = [createProduct(), createProduct()];
 
-      const expectedProducts = await Promise.all(
-        productsData.map(async (data) => {
-          const product = await getProductsRepository().create(data);
-          return {
-            ...product,
-            createdAt: product.createdAt.toISOString(),
-          };
-        }),
-      );
+      const expectedProducts = products.map((product) => ({
+        ...product,
+        createdAt: product.createdAt.toISOString(),
+      }));
+
+      const productsRepositoryStub = {
+        fetchAll: jest.fn(),
+      };
+
+      iocContainer.rebind("ProductsRepository").toConstantValue(productsRepositoryStub);
+      productsRepositoryStub.fetchAll.mockResolvedValue(products);
 
       const response = await request.get(endpoint).set("Authorization", getAuthToken(v4()));
 

@@ -171,6 +171,7 @@ describe("ProductsRepositoryDynamoDB", () => {
 
   describe("fetchAll", () => {
     it("returns all existing products in the table as an array", async () => {
+      await clearProductsTable();
       const expectedProducts = [createProduct(), createProduct()];
 
       await Promise.all(
@@ -185,8 +186,8 @@ describe("ProductsRepositoryDynamoDB", () => {
       );
 
       const actualProducts = await getRepository().fetchAll();
-      actualProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
-      expectedProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
+      // actualProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
+      // expectedProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
       expect(actualProducts).toEqual(expectedProducts);
     });
   });
