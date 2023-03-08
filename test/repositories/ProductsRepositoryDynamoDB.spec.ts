@@ -186,8 +186,8 @@ describe("ProductsRepositoryDynamoDB", () => {
       );
 
       const actualProducts = await getRepository().fetchAll();
-      // actualProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
-      // expectedProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
+      actualProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
+      expectedProducts.sort((a, b) => (a.id > b.id ? -1 : 1));
       expect(actualProducts).toEqual(expectedProducts);
     });
   });
