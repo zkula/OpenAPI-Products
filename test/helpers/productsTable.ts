@@ -10,46 +10,12 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { iocContainer } from "../../src/ioc";
 import { ProductsRepository } from "../../src/api/product/ProductsRepository";
+import { createProductsTableIfDoesNotExist as createProductsTable } from "../../src/util/createProductsTableIfDoesNotExist";
 
 //Point DynamoDBClient to Docker endpoint
 export const client = new DynamoDBClient(config.get("dynamodb"));
 
-export const createProductsTableIfDoesNotExist = async () => {
-  //Create new 'Products' table
-  try {
-    await client.send(
-      new DescribeTableCommand({
-        TableName: config.get("dbTables.products.name"),
-      }),
-    );
-  } catch (e) {
-    if (!(e instanceof ResourceNotFoundException)) {
-      throw e;
-    }
-
-    await client.send(
-      new CreateTableCommand({
-        TableName: config.get("dbTables.products.name"),
-        AttributeDefinitions: [
-          {
-            AttributeName: "ProductID",
-            AttributeType: "S",
-          },
-        ],
-        KeySchema: [
-          {
-            AttributeName: "ProductID",
-            KeyType: "HASH",
-          },
-        ],
-        ProvisionedThroughput: {
-          ReadCapacityUnits: 5,
-          WriteCapacityUnits: 5,
-        },
-      }),
-    );
-  }
-};
+export const createProductsTableIfDoesNotExist = () => createProductsTable(client);
 
 export const clearProductsTable = async () => {
   const output = await client.send(
