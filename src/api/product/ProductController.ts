@@ -1,5 +1,5 @@
 import { inject } from "inversify";
-import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, SuccessResponse } from "tsoa";
+import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, SuccessResponse, Tags } from "tsoa";
 import securities from "../auth/securities";
 import { provideSingleton } from "../../util/provideSingleton";
 import { Product, ProductData } from "./Product";
@@ -14,6 +14,7 @@ export type ProductResponseBody = {
   product: Product;
 };
 
+@Tags("product")
 @Route("product")
 @provideSingleton(ProductController)
 export class ProductController extends Controller {
@@ -65,6 +66,12 @@ export class ProductController extends Controller {
     return { product };
   }
 
+  /**
+   * Deletes a product from database if the product exists
+   * @summary deletes product
+   * @param id product identifier
+   * @example id "7b891531-8daa-476b-9b8e-7a9695127b0f"
+   */
   @Delete("{id}")
   @Security(securities.USER_AUTH)
   public async deleteProduct(@Path("id") id: string): Promise<void> {

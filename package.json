@@ -1,7 +1,7 @@
 {
-  "name": "ts-serverless-openapi",
+  "name": "openapi-products",
   "version": "1.0.0",
-  "description": "TypeScript + OpenAPI + Serverless project template",
+  "description": "Products REST API",
   "scripts": {
     "docker": "docker compose up -d dynamodb",
     "test": "npm run docker && tsoa spec-and-routes && jest --runInBand --silent",
@@ -13,7 +13,7 @@
     "build": "tsoa spec-and-routes && tsc",
     "start": "node build/src/server.js"
   },
-  "author": "Tomasz Tarnowski<youtube@tomasztarnowski.com>",
+  "author": "Zachary Kula",
   "license": "MIT",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.102",

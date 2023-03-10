@@ -4,12 +4,6 @@ import { iocContainer } from "../../src/ioc";
 import { request } from "../helpers/app";
 import { getAuthToken, testUnauthorized } from "../helpers/auth";
 import { createProduct } from "../helpers/createProduct";
-import {
-  createProductsTableIfDoesNotExist,
-  clearProductsTable,
-  client,
-  getProductsRepository,
-} from "../helpers/productsTable";
 
 const endpoint = "/products";
 

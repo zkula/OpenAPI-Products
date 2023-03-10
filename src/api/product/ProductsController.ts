@@ -1,5 +1,5 @@
 import { inject } from "inversify";
-import { Controller, Get, Route, Security, SuccessResponse } from "tsoa";
+import { Controller, Get, Route, Security, SuccessResponse, Tags } from "tsoa";
 import securities from "../auth/securities";
 import { provideSingleton } from "../../util/provideSingleton";
 import { Product } from "./Product";
@@ -10,6 +10,7 @@ export type ProductsResponseBody = {
   products: Product[];
 };
 
+@Tags("product")
 @Route("products")
 @provideSingleton(ProductsController)
 export class ProductsController extends Controller {
