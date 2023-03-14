@@ -1,10 +1,10 @@
 import { inject } from "inversify";
-import { Body, Controller, Delete, Get, Path, Post, Put, Route, Security, SuccessResponse, Tags } from "tsoa";
+import { Body, Controller, Delete, Get, Path, Post, Put, Response, Route, Security, SuccessResponse, Tags } from "tsoa";
 import securities from "../auth/securities";
 import { provideSingleton } from "../../util/provideSingleton";
 import { Product, ProductData } from "./Product";
 import { ProductsRepository } from "./ProductsRepository";
-import { ApiError } from "../ApiError";
+import { ApiError, ApiErrorJSON } from "../ApiError";
 
 export type ProductRequestBody = {
   product: ProductData;
@@ -72,6 +72,10 @@ export class ProductController extends Controller {
    * @param id product identifier
    * @example id "7b891531-8daa-476b-9b8e-7a9695127b0f"
    */
+  @Response<ApiErrorJSON>(404, "Error: Not Found", {
+    message: "product not found",
+    type: "PRODUCT_NOT_FOUND",
+  })
   @Delete("{id}")
   @Security(securities.USER_AUTH)
   public async deleteProduct(@Path("id") id: string): Promise<void> {
@@ -80,6 +84,7 @@ export class ProductController extends Controller {
     if (!deleted) {
       throw new ApiError({
         statusCode: 404,
+        message: "product not found",
         type: "PRODUCT_NOT_FOUND",
       });
     }
