@@ -22,6 +22,11 @@ export class ProductController extends Controller {
     super();
   }
 
+  /**
+   * Creates a product in the database
+   * @summary creates product
+   * @param reqBody product data
+   */
   @SuccessResponse(201)
   @Security(securities.USER_AUTH)
   @Post()
@@ -31,6 +36,13 @@ export class ProductController extends Controller {
     return { product };
   }
 
+  /**
+   * Updates a product in the database if the product exists
+   * @summary updates product
+   * @param id product identifier
+   * @param reqBody product data
+   * @example id "7b891531-8daa-476b-9b8e-7a9695127b0f"
+   */
   @SuccessResponse(200)
   @Security(securities.USER_AUTH)
   @Put("{id}")
@@ -50,6 +62,12 @@ export class ProductController extends Controller {
     return { product };
   }
 
+  /**
+   * Retrieves a product from the database if the product exists
+   * @summary retrieves product
+   * @param id product identifier
+   * @example id "7b891531-8daa-476b-9b8e-7a9695127b0f"
+   */
   @SuccessResponse(200)
   @Security(securities.USER_AUTH)
   @Get("{id}")

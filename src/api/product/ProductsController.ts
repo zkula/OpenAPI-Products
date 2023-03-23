@@ -18,6 +18,10 @@ export class ProductsController extends Controller {
     super();
   }
 
+  /**
+   * Retrieve products list from the database
+   * @summary retrieve products list
+   */
   @SuccessResponse(200)
   @Security(securities.USER_AUTH)
   @Get()
