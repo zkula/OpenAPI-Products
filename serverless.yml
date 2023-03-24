@@ -32,17 +32,17 @@ provider:
 #  region: eu-west-1
 
 # you can add statements to the Lambda function's IAM Role here
- iam:
-   role:
-     statements:
-       - Effect: "Allow"
-         Action:
-           - "dynamodb:PutItem"
-           - "dynamodb:GetItem"
-           - "dynamodb:DeleteItem"
-           - "dynamodb:Scan"
-         Resource:
-           - { "Fn::GetAtt": ["ProductsTable", "Arn"] }
+iam:
+  role:
+    statements:
+      - Effect: "Allow"
+        Action:
+          - "dynamodb:PutItem"
+          - "dynamodb:GetItem"
+          - "dynamodb:DeleteItem"
+          - "dynamodb:Scan"
+        Resource:
+          - { "Fn::GetAtt": ["ProductsTable", "Arn"] }
 #        - Effect: "Allow"
 #          Action:
 #            - "s3:ListBucket"
@@ -58,9 +58,9 @@ provider:
 #                - "/*"
 
 # you can define service wide environment variables here
- environment:
-   PRODUCTS_TABLE_NAME: ${self:provider.stage}Products
-   NODE_ENV: development
+environment:
+  PRODUCTS_TABLE_NAME: ${self:provider.stage}Products
+  NODE_ENV: development
 
 # you can add packaging information here
 package:
@@ -121,19 +121,19 @@ functions:
 plugins:
   - serverless-plugin-typescript
 #resources:
- Resources:
-   ProductsTable:
-     Type: AWS::DynamoDB::Table
-     Properties:
-       TableName: ${self:provider.environment.PRODUCTS_TABLE_NAME}
-        # cheapest for the beginning
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: ProductID
-            AttributeType: S
-        KeySchema:
-          - AttributeName: ProductID
-            KeyType: HASH
+Resources:
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: ${self:provider.environment.PRODUCTS_TABLE_NAME}
+      # cheapest for the beginning
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: ProductID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ProductID
+          KeyType: HASH
 #    NewResource:
 #      Type: AWS::S3::Bucket
 #      Properties:
